@@ -131,3 +131,6 @@ dmypy.json
 #Sublime files
 *.sublime-project
 *.sublime-workspace
+
+# file with bot token
+real_config.json
