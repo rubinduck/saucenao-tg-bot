@@ -1,9 +1,17 @@
+import io
 import os
 import json
+import urllib
+from typing import List
+
+from PIL import Image
 
 from telegram import Bot, Update
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 
+from saucenao_api import SauceNao, BasicSauce
+
+MINIMUM_SIMULARITY = 50
 
 class SauceNaoBot:
     """
@@ -58,7 +66,7 @@ class SauceNaoBot:
         file_name = f"{file_dict.file_unique_id}.{file_format}"
         self.download_file(file_id, file_name)
 
-    def download_file(self, file_id: str, file_name: str):
+    def download_file(self, file_id: str, file_name: str) -> str:
         """
         download file with certain id using telegram api and save to folder
         mathced on class initialization
@@ -66,6 +74,52 @@ class SauceNaoBot:
         file_obj = self.bot.get_file(file_id)
         file_path = os.path.join(self.download_folder, file_name)
         file_obj.download(file_path)
+        return file_path
+
+
+
+class RequestResult:
+    def __init__(self, photo: Image, text: str):
+        self.photo = photo
+        self.text = text
+
+    def __str__(self):
+        return f"{self.text}\n{str(self.photo)}"
+
+
+class RequestResultProvider:
+    def __init__(self):
+        self.sauce_api = SauceNao()
+
+    def provide_response(self, path_to_file: str) -> List[RequestResult]:
+        """
+        method provide saucenao results for file
+        """
+        with open(path_to_file, "rb") as file:
+            request_results = self.sauce_api.from_file(file)
+        responses = []
+        for result in request_results:
+            if result.similarity >= MINIMUM_SIMULARITY:
+                responses.append(self.gen_response_obj(result))
+
+        return responses
+
+    def gen_response_obj(response: BasicSauce) -> RequestResult:
+        """
+        method generating RequestResult, suitable to be sent by bot from api-
+        provided data
+        """
+        text = f"\n{response.similarity}"
+        if response.url is not None:
+            text += "\n".join(response.url)
+        else:
+            text += response.index_name
+            text += response.author if response.author is not None else ""
+
+        thumbnail_url = response.thumbnail
+        thumbnail_path = io.BytesIO(urllib.request.urlopen(thumbnail_url).read())
+        thumbnail_object = Image.open(thumbnail_path)
+        return RequestResult(thumbnail_object, text)
 
 
 def main():
