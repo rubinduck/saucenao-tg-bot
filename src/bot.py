@@ -4,25 +4,35 @@ import json
 import urllib
 from typing import List
 
-from PIL import Image
 
 from telegram import Bot, Update
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 
 from saucenao_api import SauceNao, BasicSauce
 
-MINIMUM_SIMULARITY = 50
+
+class RequestResult:
+    def __init__(self, photo_url: str, text: str):
+        self.photo_url = photo_url
+        self.text = text
+
+    def __str__(self):
+        return f"{self.text}\n{str(self.photo)}"
+
 
 class SauceNaoBot:
     """
     Class incapsulating logic and objects
     for work of telegram sausenao search bot
     """
-    def __init__(self, token: str, save_folder_path: str):
+    def __init__(self, token: str,
+                 save_folder_path: str,
+                 minimal_similarity: float):
         self.bot = Bot(token)
         self.updater = Updater(token=token, use_context=True)
         self.download_folder = save_folder_path
         self.init_handlers()
+        self.request_result_provider = RequestResultProvider(minimal_similarity)
 
     def init_handlers(self):
         """
@@ -53,7 +63,8 @@ class SauceNaoBot:
         photo_dict = update.message.photo[-1]
         photo_id = photo_dict.file_id
         file_name = f"{photo_dict.file_unique_id}.jpg"
-        self.download_file(photo_id, file_name)
+        file_path = self.download_file(photo_id, file_name)
+        self.process_request(update, file_path)
 
     def download_image_file(self, update: Update, context: CallbackContext):
         """
@@ -64,7 +75,8 @@ class SauceNaoBot:
         # mime_type looks like image/someformat
         file_format = file_dict.mime_type.split('/')[1]
         file_name = f"{file_dict.file_unique_id}.{file_format}"
-        self.download_file(file_id, file_name)
+        file_path = self.download_file(file_id, file_name)
+        self.process_request(update, file_path)
 
     def download_file(self, file_id: str, file_name: str) -> str:
         """
@@ -76,19 +88,36 @@ class SauceNaoBot:
         file_obj.download(file_path)
         return file_path
 
+    def process_request(self, update: Update, img_path: str):
+        """
+        process user requets (photo), send result to user
+        """
+        result = self.request_result_provider.provide_response(img_path)
+        os.remove(img_path)
+        chat_id = update.message.chat_id
+        self.post_request_resutls(chat_id, result)
 
 
-class RequestResult:
-    def __init__(self, photo: Image, text: str):
-        self.photo = photo
-        self.text = text
+    def post_request_resutls(self, chat_id: str,
+                             request_results: List[RequestResult]):
+        """
+        send results to user throught bot
+        """
+        if request_results == []:
+            self.bot.send_message(chat_id=chat_id, text="Nothing found(")
+        for res in request_results:
+            self.bot.send_photo(
+                chat_id=chat_id,
+                photo=res.photo_url,
+                caption=res.text)
 
-    def __str__(self):
-        return f"{self.text}\n{str(self.photo)}"
+
+
 
 
 class RequestResultProvider:
-    def __init__(self):
+    def __init__(self, minimal_similarity):
+        self.MINIMUM_SIMULARITY = minimal_similarity
         self.sauce_api = SauceNao()
 
     def provide_response(self, path_to_file: str) -> List[RequestResult]:
@@ -99,17 +128,17 @@ class RequestResultProvider:
             request_results = self.sauce_api.from_file(file)
         responses = []
         for result in request_results:
-            if result.similarity >= MINIMUM_SIMULARITY:
+            if result.similarity >= self.MINIMUM_SIMULARITY:
                 responses.append(self.gen_response_obj(result))
 
         return responses
 
-    def gen_response_obj(response: BasicSauce) -> RequestResult:
+    def gen_response_obj(self, response: BasicSauce) -> RequestResult:
         """
         method generating RequestResult, suitable to be sent by bot from api-
         provided data
         """
-        text = f"\n{response.similarity}"
+        text = f"{response.similarity}\n"
         if response.url is not None:
             text += "\n".join(response.url)
         else:
@@ -117,22 +146,21 @@ class RequestResultProvider:
             text += response.author if response.author is not None else ""
 
         thumbnail_url = response.thumbnail
-        thumbnail_path = io.BytesIO(urllib.request.urlopen(thumbnail_url).read())
-        thumbnail_object = Image.open(thumbnail_path)
-        return RequestResult(thumbnail_object, text)
+        return RequestResult(thumbnail_url, text)
 
 
 def main():
     with open("real_config.json", "r") as file:
         configs = json.load(file)
     TOKEN = configs["token"]
+    MINIMUM_SIMULARITY = configs["minimal_similarity"]
     DIR = configs["download_dir"]
     if DIR == "":
         if not os.path.exists("images"):
             os.makedirs("images")
         DIR = "images"
 
-    sauce_nao_bot = SauceNaoBot(TOKEN, DIR)
+    sauce_nao_bot = SauceNaoBot(TOKEN, DIR, MINIMUM_SIMULARITY)
     sauce_nao_bot.start()
 
 
