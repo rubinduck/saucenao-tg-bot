@@ -66,8 +66,7 @@ class SauceNaoBot:
         photo_dict = update.message.photo[-1]
         photo_id = photo_dict.file_id
         file_name = f"{photo_dict.file_unique_id}.jpg"
-        file_path = self.download_file(photo_id, file_name)
-        self.process_request(update, file_path)
+        self.process_request(update, file_id, file_name)
 
     def download_image_file(self, update: Update, context: CallbackContext):
         """
@@ -78,8 +77,7 @@ class SauceNaoBot:
         # mime_type looks like image/someformat
         file_format = file_dict.mime_type.split('/')[1]
         file_name = f"{file_dict.file_unique_id}.{file_format}"
-        file_path = self.download_file(file_id, file_name)
-        self.process_request(update, file_path)
+        self.process_request(update, file_id, file_name)
 
     def download_file(self, file_id: str, file_name: str) -> str:
         """
@@ -91,10 +89,11 @@ class SauceNaoBot:
         file_obj.download(file_path)
         return file_path
 
-    def process_request(self, update: Update, img_path: str):
+    def process_request(self, update: Update, file_id: str, file_name: str):
         """
         process user requets (photo), send result to user
         """
+        img_path = self.download_file(file_id, file_name)
         result = self.request_result_provider.provide_response(img_path)
         os.remove(img_path)
         chat_id = update.message.chat_id
