@@ -106,7 +106,7 @@ class SauceNaoBot:
         """
         if request_results == []:
             self.bot.send_message(chat_id=chat_id, text="Nothing found(")
-        for res in request_results:
+        for res in request_results[::-1]:
             self.bot.send_photo(
                 chat_id=chat_id,
                 photo=res.photo_url,
