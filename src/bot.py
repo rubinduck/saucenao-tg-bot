@@ -66,7 +66,7 @@ class SauceNaoBot:
         photo_dict = update.message.photo[-1]
         photo_id = photo_dict.file_id
         file_name = f"{photo_dict.file_unique_id}.jpg"
-        self.process_request(update, file_id, file_name)
+        self.process_request(update, photo_id, file_name)
 
     def process_image_file(self, update: Update, context: CallbackContext):
         """
@@ -124,8 +124,11 @@ class RequestResultProvider:
         """
         with open(path_to_file, "rb") as file:
             request_results = self.sauce_api.from_file(file)
-        responses = filter(lambda r: r.similarity >= self.MINIMUM_SIMULARITY,
-                           request_results)
+
+        responses = []
+        for result in request_results:
+            if result.similarity >= self.MINIMUM_SIMULARITY:
+                responses.append(self.gen_response_obj(result))
 
         return list(responses)
 
