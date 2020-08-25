@@ -159,11 +159,13 @@ def main():
 
     for confg_name in BOT_CONFIGS:
         BOT_CONFIGS[confg_name] = os.environ.get(confg_name)
-    if not all(BOT_CONFIGS.values()):
+    if not all(map(lambda x: x is not None, BOT_CONFIGS.values())):
         with open("real_config.json", "r") as file:
             configs = json.load(file)
         for confg_name in BOT_CONFIGS:
             BOT_CONFIGS[confg_name] = configs[confg_name]
+    else:
+        BOT_CONFIGS["MINIMUM_SIMULARITY"] = float(BOT_CONFIGS["MINIMUM_SIMULARITY"])
 
     if BOT_CONFIGS["DOWNLOAD_DIR"] == "":
         if not os.path.exists("images"):
