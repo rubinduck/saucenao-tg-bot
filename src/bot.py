@@ -43,10 +43,10 @@ class SauceNaoBot:
         """
         photo_handler = MessageHandler(
             Filters.photo,
-            self.download_photo)
+            self.process_photo)
         image_file_handler = MessageHandler(
             Filters.document.category("image/"),
-            self.download_image_file)
+            self.process_image_file)
         self.updater.dispatcher.add_handler(photo_handler)
         self.updater.dispatcher.add_handler(image_file_handler)
 
@@ -57,7 +57,7 @@ class SauceNaoBot:
         self.updater.stop()
 
 
-    def download_photo(self, update: Update, context: CallbackContext):
+    def process_photo(self, update: Update, context: CallbackContext):
         """
         method for photos send compressed
         """
@@ -68,7 +68,7 @@ class SauceNaoBot:
         file_name = f"{photo_dict.file_unique_id}.jpg"
         self.process_request(update, file_id, file_name)
 
-    def download_image_file(self, update: Update, context: CallbackContext):
+    def process_image_file(self, update: Update, context: CallbackContext):
         """
         method for images sent as file
         """
@@ -78,16 +78,6 @@ class SauceNaoBot:
         file_format = file_dict.mime_type.split('/')[1]
         file_name = f"{file_dict.file_unique_id}.{file_format}"
         self.process_request(update, file_id, file_name)
-
-    def download_file(self, file_id: str, file_name: str) -> str:
-        """
-        download file with certain id using telegram api and save to folder
-        mathced on class initialization
-        """
-        file_obj = self.bot.get_file(file_id)
-        file_path = os.path.join(self.download_folder, file_name)
-        file_obj.download(file_path)
-        return file_path
 
     def process_request(self, update: Update, file_id: str, file_name: str):
         """
@@ -99,6 +89,15 @@ class SauceNaoBot:
         chat_id = update.message.chat_id
         self.post_request_resutls(chat_id, result)
 
+    def download_file(self, file_id: str, file_name: str) -> str:
+        """
+        download file with certain id using telegram api and save to folder
+        mathced on class initialization
+        """
+        file_obj = self.bot.get_file(file_id)
+        file_path = os.path.join(self.download_folder, file_name)
+        file_obj.download(file_path)
+        return file_path
 
     def post_request_resutls(self, chat_id: str,
                              request_results: List[RequestResult]):
