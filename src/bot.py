@@ -1,12 +1,14 @@
-import io
+"""
+Bot providing ability to search images using saucenao.com inside telegram
+"""
+
 import os
 import json
-import urllib
 from typing import List
 
 
 from telegram import Bot, Update
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
+from telegram.ext import CallbackContext, Updater, MessageHandler, Filters
 
 from saucenao_api import SauceNao, BasicSauce
 
@@ -31,12 +33,13 @@ class SauceNaoBot:
         self.bot = Bot(token)
         self.updater = Updater(token=token, use_context=True)
         self.download_folder = save_folder_path
+
         self.init_handlers()
         self.request_result_provider = RequestResultProvider(minimal_similarity)
 
     def init_handlers(self):
         """
-        create handlers for message types we are interested in
+        method creates handlers for message types we are interested in
         """
         photo_handler = MessageHandler(
             Filters.photo,
@@ -59,7 +62,7 @@ class SauceNaoBot:
         method for photos send compressed
         """
         # telegram provides 3 photo versions from most compressed to most
-        # the most quality one is getted here
+        # the most quality one, which is used here for search
         photo_dict = update.message.photo[-1]
         photo_id = photo_dict.file_id
         file_name = f"{photo_dict.file_unique_id}.jpg"
@@ -122,7 +125,7 @@ class RequestResultProvider:
 
     def provide_response(self, path_to_file: str) -> List[RequestResult]:
         """
-        method provide saucenao results for file
+        method providing saucenao results for given file
         """
         with open(path_to_file, "rb") as file:
             request_results = self.sauce_api.from_file(file)
