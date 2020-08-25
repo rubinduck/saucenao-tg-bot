@@ -146,17 +146,28 @@ class RequestResultProvider:
 
 
 def main():
-    with open("real_config.json", "r") as file:
-        configs = json.load(file)
-    TOKEN = configs["token"]
-    MINIMUM_SIMULARITY = configs["minimal_similarity"]
-    DIR = configs["download_dir"]
-    if DIR == "":
+    """
+    Launch bot using enviroment variables as config or json config file if
+    enviroment variables is absent
+    """
+    BOT_CONFIGS = {"TOKEN": None,
+                   "DOWNLOAD_DIR": None,
+                   "MINIMUM_SIMULARITY": None}
+
+    for confg_name in BOT_CONFIGS:
+        BOT_CONFIGS[confg_name] = os.environ.get(confg_name)
+    if not all(BOT_CONFIGS.values()):
+        with open("real_config.json", "r") as file:
+            configs = json.load(file)
+        for confg_name in BOT_CONFIGS:
+            BOT_CONFIGS[confg_name] = configs[confg_name]
+
+    if BOT_CONFIGS["DOWNLOAD_DIR"] == "":
         if not os.path.exists("images"):
             os.makedirs("images")
-        DIR = "images"
+        BOT_CONFIGS["DOWNLOAD_DIR"] = "images"
 
-    sauce_nao_bot = SauceNaoBot(TOKEN, DIR, MINIMUM_SIMULARITY)
+    sauce_nao_bot = SauceNaoBot(*BOT_CONFIGS.values())
     sauce_nao_bot.start()
 
 
