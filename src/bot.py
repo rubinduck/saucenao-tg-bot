@@ -126,7 +126,6 @@ class RequestResultProvider:
 
         responses = [self.gen_response_obj(r) for r in request_results
                      if r.similarity >= self.MINIMUM_SIMULARITY]
-
         return responses
 
     def gen_response_obj(self, response: BasicSauce) -> RequestResult:
@@ -148,21 +147,31 @@ class RequestResultProvider:
 def main():
     """
     Launch bot using enviroment variables as config or json config file if
-    enviroment variables is absent
+    it is specified as command line arg
     """
+    from argparse import ArgumentParser
+
+    arg_parser = ArgumentParser()
+    arg_parser.add_argument("--config-file", type=str,
+                            help="path to json file with config like example")
+    args = arg_parser.parse_args()
+
     BOT_CONFIGS = {"TOKEN": None,
                    "DOWNLOAD_DIR": None,
                    "MINIMUM_SIMULARITY": None}
 
-    for confg_name in BOT_CONFIGS:
-        BOT_CONFIGS[confg_name] = os.environ.get(confg_name)
-    if not all(map(lambda x: x is not None, BOT_CONFIGS.values())):
-        with open("real_config.json", "r") as file:
+    config_file = args.config_file
+    if config_file:
+        if not os.path.isfile(config_file):
+            print("Invalid config file")
+            return
+        with open(config_file, "r") as file:
             configs = json.load(file)
-        for confg_name in BOT_CONFIGS:
-            BOT_CONFIGS[confg_name] = configs[confg_name]
+            for confg_name in BOT_CONFIGS:
+                BOT_CONFIGS[confg_name] = configs[confg_name]
     else:
-        BOT_CONFIGS["MINIMUM_SIMULARITY"] = float(BOT_CONFIGS["MINIMUM_SIMULARITY"])
+        for confg_name in BOT_CONFIGS:
+            BOT_CONFIGS[confg_name] = os.environ.get(confg_name)
 
     if BOT_CONFIGS["DOWNLOAD_DIR"] == "":
         if not os.path.exists("images"):
