@@ -61,11 +61,10 @@ class SauceNaoBot:
         """
         method for photos send compressed
         """
-        # telegram provides 3 photo versions from most compressed to most
-        # the most quality one, which is used here for search
-        photo_dict = update.message.photo[-1]
-        photo_id = photo_dict.file_id
-        file_name = f"{photo_dict.file_unique_id}.jpg"
+        # telegram provides 3 photo versions from most compressed
+        # to the most quality one, which is used here for search
+        photo_id = update.message.photo[-1].file_id
+        file_name = f"{photo_id}.jpg"
         self.process_request(update, photo_id, file_name)
 
     def handle_image_file(self, update: Update, context: CallbackContext):
@@ -76,7 +75,7 @@ class SauceNaoBot:
         file_id = file_dict.file_id
         # mime_type looks like image/someformat
         file_format = file_dict.mime_type.split('/')[1]
-        file_name = f"{file_dict.file_unique_id}.{file_format}"
+        file_name = f"{file_id}.{file_format}"
         self.process_request(update, file_id, file_name)
 
     def process_request(self, update: Update, file_id: str, file_name: str):
