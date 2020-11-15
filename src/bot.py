@@ -138,8 +138,8 @@ class RequestResultProvider:
         if response.urls != []:
             text += "\n".join(response.urls)
         else:
-            text += f"{response.index_name}\n"
-            text += f"{response.author}\n" if response.author is not None else ""
+            text += f"Title:{response.title}\n" if response.title is not None else ""
+            text += f"Author:{response.author}\n" if response.author is not None else ""
 
         thumbnail_url = response.thumbnail
         return RequestResult(thumbnail_url, text)
