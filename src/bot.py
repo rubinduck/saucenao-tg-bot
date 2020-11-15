@@ -43,10 +43,10 @@ class SauceNaoBot:
         """
         photo_handler = MessageHandler(
             Filters.photo,
-            self.process_photo)
+            self.handle_photo)
         image_file_handler = MessageHandler(
             Filters.document.category("image/"),
-            self.process_image_file)
+            self.handle_image_file)
         self.updater.dispatcher.add_handler(photo_handler)
         self.updater.dispatcher.add_handler(image_file_handler)
 
@@ -57,7 +57,7 @@ class SauceNaoBot:
         self.updater.stop()
 
 
-    def process_photo(self, update: Update, context: CallbackContext):
+    def handle_photo(self, update: Update, context: CallbackContext):
         """
         method for photos send compressed
         """
@@ -68,7 +68,7 @@ class SauceNaoBot:
         file_name = f"{photo_dict.file_unique_id}.jpg"
         self.process_request(update, photo_id, file_name)
 
-    def process_image_file(self, update: Update, context: CallbackContext):
+    def handle_image_file(self, update: Update, context: CallbackContext):
         """
         method for images sent as file
         """
