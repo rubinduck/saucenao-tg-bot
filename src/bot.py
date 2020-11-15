@@ -176,6 +176,7 @@ def main():
     else:
         for confg_name in BOT_CONFIGS:
             BOT_CONFIGS[confg_name] = os.environ.get(confg_name)
+        BOT_CONFIGS["MINIMUM_SIMULARITY"] = float(BOT_CONFIGS["MINIMUM_SIMULARITY"])
 
     if BOT_CONFIGS["DOWNLOAD_DIR"] == "":
         if not os.path.exists("images"):
