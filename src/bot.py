@@ -7,7 +7,7 @@ import json
 from typing import List
 
 
-from telegram import Bot, Update
+from telegram import Bot, Update, InputMediaPhoto
 from telegram.ext import CallbackContext, Updater, MessageHandler, Filters
 
 from saucenao_api import SauceNao, BasicSauce
@@ -103,13 +103,18 @@ class SauceNaoBot:
         """
         send results to user throught bot
         """
-        if request_results == []:
+        if request_results != []:
+            media = [InputMediaPhoto(r.photo_url)
+                     for r in request_results]
+            # caption put to first media becouse tg shows only first caption
+            caption = ("\n" + "-" * 50 + "\n").join(
+                       r.text for r in request_results)
+            media[1].caption = caption
+
+            self.bot.send_media_group(chat_id=chat_id, media=media)
+        else:
             self.bot.send_message(chat_id=chat_id, text="Nothing found(")
-        for res in request_results[::-1]:
-            self.bot.send_photo(
-                chat_id=chat_id,
-                photo=res.photo_url,
-                caption=res.text)
+
 
 
 class RequestResultProvider:
