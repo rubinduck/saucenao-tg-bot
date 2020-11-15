@@ -138,8 +138,8 @@ class RequestResultProvider:
         provided data
         """
         text = f"{response.similarity}\n"
-        if response.url is not None:
-            text += "\n".join(response.url)
+        if response.urls is not None:
+            text += "\n".join(response.urls)
         else:
             text += f"{response.index_name}\n"
             text += f"{response.author}\n" if response.author is not None else ""
