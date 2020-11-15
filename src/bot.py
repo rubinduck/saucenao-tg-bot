@@ -124,12 +124,10 @@ class RequestResultProvider:
         with open(path_to_file, "rb") as file:
             request_results = self.sauce_api.from_file(file)
 
-        responses = []
-        for result in request_results:
-            if result.similarity >= self.MINIMUM_SIMULARITY:
-                responses.append(self.gen_response_obj(result))
+        responses = [self.gen_response_obj(r) for r in request_results
+                     if r.similarity >= self.MINIMUM_SIMULARITY]
 
-        return list(responses)
+        return responses
 
     def gen_response_obj(self, response: BasicSauce) -> RequestResult:
         """
