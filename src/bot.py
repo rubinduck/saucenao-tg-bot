@@ -135,7 +135,7 @@ class RequestResultProvider:
         provided data
         """
         text = f"{response.similarity}\n"
-        if response.urls is not None:
+        if response.urls != []:
             text += "\n".join(response.urls)
         else:
             text += f"{response.index_name}\n"
