@@ -109,7 +109,7 @@ class SauceNaoBot:
             # caption put to first media becouse tg shows only first caption
             caption = ("\n" + "-" * 50 + "\n").join(
                        r.text for r in request_results)
-            media[1].caption = caption
+            media[0].caption = caption
 
             self.bot.send_media_group(chat_id=chat_id, media=media)
         else:
@@ -147,7 +147,6 @@ class RequestResultProvider:
 
         thumbnail_url = response.thumbnail
         return RequestResult(thumbnail_url, text)
-
 
 def main():
     """
