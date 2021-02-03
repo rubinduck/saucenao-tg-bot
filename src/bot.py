@@ -28,6 +28,7 @@ class SauceNaoBot:
     for work of telegram sausenao search bot
     """
     def __init__(self, token: str,
+                 api_key: str,
                  save_folder_path: str,
                  minimal_similarity: float):
         self.bot = Bot(token)
@@ -35,7 +36,8 @@ class SauceNaoBot:
         self.download_folder = save_folder_path
 
         self.init_handlers()
-        self.request_result_provider = RequestResultProvider(minimal_similarity)
+        self.request_result_provider = RequestResultProvider(api_key,
+                                                             minimal_similarity)
 
     def init_handlers(self):
         """
@@ -118,9 +120,9 @@ class SauceNaoBot:
 
 
 class RequestResultProvider:
-    def __init__(self, minimal_similarity):
+    def __init__(self, api_key, minimal_similarity):
         self.MINIMUM_SIMULARITY = minimal_similarity
-        self.sauce_api = SauceNao()
+        self.sauce_api = SauceNao(api_key=api_key)
 
     def provide_response(self, path_to_file: str) -> List[RequestResult]:
         """
@@ -161,6 +163,7 @@ def main():
     args = arg_parser.parse_args()
 
     BOT_CONFIGS = {"TOKEN": None,
+                   "API_KEY": None,
                    "DOWNLOAD_DIR": None,
                    "MINIMUM_SIMULARITY": None}
 
@@ -182,7 +185,6 @@ def main():
         if not os.path.exists("images"):
             os.makedirs("images")
         BOT_CONFIGS["DOWNLOAD_DIR"] = "images"
-
     sauce_nao_bot = SauceNaoBot(*BOT_CONFIGS.values())
     sauce_nao_bot.start()
 
