@@ -19,11 +19,8 @@ class RequestResult:
 
 
 class SauceNaoBot:
-    """
-    Class incapsulating logic and objects
-    for work of telegram sausenao search bot
-    """
-    def __init__(self, token: str,
+    def __init__(self,
+                 token: str,
                  api_key: str,
                  save_folder_path: str,
                  minimal_similarity: float):
@@ -31,14 +28,11 @@ class SauceNaoBot:
         self.updater = Updater(token=token, use_context=True)
         self.download_folder = save_folder_path
 
-        self.init_handlers()
+        self.init_message_handlers()
         self.request_result_provider = RequestResultProvider(api_key,
                                                              minimal_similarity)
 
-    def init_handlers(self):
-        """
-        method creates handlers for message types we are interested in
-        """
+    def init_message_handlers(self):
         photo_handler = MessageHandler(
             Filters.photo,
             self.handle_photo)
@@ -54,11 +48,8 @@ class SauceNaoBot:
     def stop(self):
         self.updater.stop()
 
-
     def handle_photo(self, update: Update, context: CallbackContext):
-        """
-        method for photos send compressed
-        """
+        """method for images sent compressed"""
         # telegram provides 3 photo versions from most compressed
         # to the most quality one, which is used here for search
         photo_id = update.message.photo[-1].file_id
@@ -66,9 +57,7 @@ class SauceNaoBot:
         self.process_request(update, photo_id, file_name)
 
     def handle_image_file(self, update: Update, context: CallbackContext):
-        """
-        method for images sent as file
-        """
+        """method for images sent as file"""
         file_dict = update.message.document
         file_id = file_dict.file_id
         # mime_type looks like image/someformat
@@ -77,9 +66,7 @@ class SauceNaoBot:
         self.process_request(update, file_id, file_name)
 
     def process_request(self, update: Update, file_id: str, file_name: str):
-        """
-        process user requets (photo), send result to user
-        """
+        """process user requets (photo), send result to user"""
         img_path = self.download_file(file_id, file_name)
         result = self.request_result_provider.provide_response(img_path)
         os.remove(img_path)
@@ -87,10 +74,7 @@ class SauceNaoBot:
         self.post_request_resutls(chat_id, result)
 
     def download_file(self, file_id: str, file_name: str) -> str:
-        """
-        download file with certain id using telegram api and save to folder
-        mathced on class initialization
-        """
+        """download file with file_id to self.download_folder"""
         file_obj = self.bot.get_file(file_id)
         file_path = os.path.join(self.download_folder, file_name)
         file_obj.download(file_path)
