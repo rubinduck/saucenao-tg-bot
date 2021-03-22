@@ -130,10 +130,10 @@ def main():
                             help="path to json file with config like example")
     args = arg_parser.parse_args()
 
-    BOT_CONFIGS = {"TOKEN": None,
-                   "API_KEY": None,
-                   "DOWNLOAD_DIR": None,
-                   "MINIMUM_SIMULARITY": None}
+    BOT_CONFIGS = {"token": None,
+                   "api_key": None,
+                   "download_dir": None,
+                   "minimal_similarity": None}
 
     config_file = args.config_file
     if config_file:
@@ -142,17 +142,24 @@ def main():
             return
         with open(config_file, "r") as file:
             configs = json.load(file)
-            for confg_name in BOT_CONFIGS:
-                BOT_CONFIGS[confg_name] = configs[confg_name]
+        for config_name in BOT_CONFIGS:
+            BOT_CONFIGS[config_name] = configs[config_name]
     else:
-        for confg_name in BOT_CONFIGS:
-            BOT_CONFIGS[confg_name] = os.environ.get(confg_name)
-        BOT_CONFIGS["MINIMUM_SIMULARITY"] = float(BOT_CONFIGS["MINIMUM_SIMULARITY"])
+        for config_name in BOT_CONFIGS:
+            try:
+                BOT_CONFIGS[config_name] = os.environ[config_name]
+            except KeyError:
+                print(f"{config_name} not in enviroment variables")
+                return
+        try:
+            BOT_CONFIGS["minimal_similarity"] = float(BOT_CONFIGS["minimal_similarity"])
+        except ValueError:
+            print(f"{BOT_CONFIGS['minimal_similarity']} is incorrect value for minimal similarity")
 
-    if BOT_CONFIGS["DOWNLOAD_DIR"] == "":
+    if BOT_CONFIGS["download_dir"] == "":
         if not os.path.exists("images"):
             os.makedirs("images")
-        BOT_CONFIGS["DOWNLOAD_DIR"] = "images"
+        BOT_CONFIGS["download_dir"] = "images"
     sauce_nao_bot = SauceNaoBot(*BOT_CONFIGS.values())
     sauce_nao_bot.start()
 
