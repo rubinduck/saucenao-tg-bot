@@ -69,9 +69,9 @@ class SauceNaoBot:
         """process user requets (photo), send result to user"""
         img_path = self.download_file(file_id, file_name)
         result = self.request_result_provider.provide_response(img_path)
-        os.remove(img_path)
+        self.delete_file(img_path)
         chat_id = update.message.chat_id
-        self.post_request_resutls(chat_id, result)
+        self.post_request_results(chat_id, result)
 
     def download_file(self, file_id: str, file_name: str) -> str:
         """download file with file_id to self.download_folder"""
@@ -80,23 +80,18 @@ class SauceNaoBot:
         file_obj.download(file_path)
         return file_path
 
-    def post_request_resutls(self, chat_id: str,
-                             request_results: List[RequestResult]):
-        """
-        send results to user throught bot
-        """
-        if request_results != []:
-            media = [InputMediaPhoto(r.photo_url)
-                     for r in request_results]
-            # caption put to first media becouse tg shows only first caption
-            caption = ("\n" + "-" * 50 + "\n").join(
-                       r.text for r in request_results)
-            media[0].caption = caption
+    def delete_file(self, file_path: str):
+        os.remove(file_path)
 
-            self.bot.send_media_group(chat_id=chat_id, media=media)
-        else:
+    def post_request_results(self, chat_id: str, results: List[RequestResult]):
+        if results == []:
             self.bot.send_message(chat_id=chat_id, text="Nothing found(")
-
+            return
+        media = [InputMediaPhoto(r.photo_url) for r in results]
+        # caption put to first media becouse tg shows only first caption
+        caption = ("\n" + "-" * 50 + "\n").join(r.text for r in results)
+        media[0].caption = caption
+        self.bot.send_media_group(chat_id=chat_id, media=media)
 
 
 class RequestResultProvider:
