@@ -90,7 +90,7 @@ class SauceNaoBot:
 
 class RequestResultProvider:
     def __init__(self, api_key: str, minimal_similarity: float):
-        self.MINIMUM_SIMULARITY = minimal_similarity
+        self.minimal_similarity = minimal_similarity
         self.sauce_api = SauceNao(api_key=api_key)
 
     def provide_response(self, path_to_file: str) -> List[RequestResult]:
@@ -98,7 +98,7 @@ class RequestResultProvider:
             request_results = self.sauce_api.from_file(file)
 
         responses = [self.gen_response_obj(r) for r in request_results
-                     if r.similarity >= self.MINIMUM_SIMULARITY]
+                     if r.similarity >= self.minimal_similarity]
         return responses
 
     def gen_response_obj(self, response: BasicSauce) -> RequestResult:
@@ -108,7 +108,6 @@ class RequestResultProvider:
         else:
             text += f"Title:{response.title}\n" if response.title is not None else ""
             text += f"Author:{response.author}\n" if response.author is not None else ""
-
         thumbnail_url = response.thumbnail
         return RequestResult(thumbnail_url, text)
 
