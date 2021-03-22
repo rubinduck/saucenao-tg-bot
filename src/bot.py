@@ -5,21 +5,17 @@ Bot providing ability to search images using saucenao.com inside telegram
 import os
 import json
 from typing import List
-
+from dataclasses import dataclass
 
 from telegram import Bot, Update, InputMediaPhoto
 from telegram.ext import CallbackContext, Updater, MessageHandler, Filters
-
 from saucenao_api import SauceNao, BasicSauce
 
 
+@dataclass
 class RequestResult:
-    def __init__(self, photo_url: str, text: str):
-        self.photo_url = photo_url
-        self.text = text
-
-    def __str__(self):
-        return f"{self.text}\n{str(self.photo)}"
+    photo_url: str
+    text: str
 
 
 class SauceNaoBot:
