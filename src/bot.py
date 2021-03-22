@@ -12,12 +12,6 @@ from telegram.ext import CallbackContext, Updater, MessageHandler, Filters
 from saucenao_api import SauceNao, BasicSauce
 
 
-@dataclass
-class RequestResult:
-    photo_url: str
-    text: str
-
-
 class SauceNaoBot:
     def __init__(self,
                  token: str,
@@ -95,14 +89,11 @@ class SauceNaoBot:
 
 
 class RequestResultProvider:
-    def __init__(self, api_key, minimal_similarity):
+    def __init__(self, api_key: str, minimal_similarity: float):
         self.MINIMUM_SIMULARITY = minimal_similarity
         self.sauce_api = SauceNao(api_key=api_key)
 
     def provide_response(self, path_to_file: str) -> List[RequestResult]:
-        """
-        method providing saucenao results for given image file
-        """
         with open(path_to_file, "rb") as file:
             request_results = self.sauce_api.from_file(file)
 
@@ -111,10 +102,6 @@ class RequestResultProvider:
         return responses
 
     def gen_response_obj(self, response: BasicSauce) -> RequestResult:
-        """
-        method generating RequestResult, suitable to be sent by bot from api-
-        provided data
-        """
         text = f"{response.similarity}\n"
         if response.urls != []:
             text += "\n".join(response.urls)
@@ -124,6 +111,13 @@ class RequestResultProvider:
 
         thumbnail_url = response.thumbnail
         return RequestResult(thumbnail_url, text)
+
+
+@dataclass
+class RequestResult:
+    photo_url: str
+    text: str
+
 
 def main():
     """
