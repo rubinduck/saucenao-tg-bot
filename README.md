@@ -2,6 +2,7 @@
 Telegram bot to access SauceNAO.com functionality for searching image source
 
 # How to launch
+Requires python 3.7+
 Install dependencies from requrments.txt. Put config variables to enviroment variables or to .json config file. 
 Config variables:
 
