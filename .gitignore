@@ -128,9 +128,13 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-#Sublime files
+# Sublime files
 *.sublime-project
 *.sublime-workspace
 
 # file with bot token
 real_config.json
+# folder with images
+images/
+# vim files
+*.swp
