@@ -12,6 +12,12 @@ from telegram.ext import CallbackContext, Updater, MessageHandler, Filters
 from saucenao_api import SauceNao, BasicSauce
 
 
+@dataclass
+class RequestResult:
+    photo_url: str
+    text: str
+
+
 class SauceNaoBot:
     def __init__(self,
                  token: str,
@@ -112,10 +118,6 @@ class RequestResultProvider:
         return RequestResult(thumbnail_url, text)
 
 
-@dataclass
-class RequestResult:
-    photo_url: str
-    text: str
 
 
 def main():
@@ -133,7 +135,7 @@ def main():
     BOT_CONFIGS = {"token": None,
                    "api_key": None,
                    "download_dir": None,
-                   "minimal_similarity": None}
+                   "minimal_simularity": None}
 
     config_file = args.config_file
     if config_file:
@@ -141,20 +143,20 @@ def main():
             print("Invalid config file")
             return
         with open(config_file, "r") as file:
-            configs = json.load(file)
-        for config_name in BOT_CONFIGS:
-            BOT_CONFIGS[config_name] = configs[config_name]
+            config_source = json.load(file)
     else:
-        for config_name in BOT_CONFIGS:
-            try:
-                BOT_CONFIGS[config_name] = os.environ[config_name]
-            except KeyError:
-                print(f"{config_name} not in enviroment variables")
-                return
-        try:
-            BOT_CONFIGS["minimal_similarity"] = float(BOT_CONFIGS["minimal_similarity"])
-        except ValueError:
-            print(f"{BOT_CONFIGS['minimal_similarity']} is incorrect value for minimal similarity")
+        config_source = os.environ
+
+    for config_value_key in BOT_CONFIGS:
+        config_value = config_source.get(config_value_key)
+        if config_value is None:
+            print(f"{config_name} have no value in given config source")
+            return
+        BOT_CONFIGS[config_value_key] = config_value
+    try:
+         BOT_CONFIGS["minimal_simularity"] = float(BOT_CONFIGS["minimal_simularity"])
+    except ValueError:
+        print(f"{BOT_CONFIGS['minimal_similarity']} is incorrect value for minimal similarity")
 
     if BOT_CONFIGS["download_dir"] == "":
         if not os.path.exists("images"):
