@@ -41,12 +41,6 @@ def main():
     arg_parser.add_argument("config_file_path", type=str,
                             help="path to json file with config like example")
     args = arg_parser.parse_args()
-
-    BOT_CONFIGS = {"token": None,
-                   "api_key": None,
-                   "download_dir": None,
-                   "minimal_simularity": None}
-
     config_file_path = args.config_file_path
 
     if not os.path.isfile(config_file_path):
