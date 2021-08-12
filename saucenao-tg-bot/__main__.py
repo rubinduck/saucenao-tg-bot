@@ -1,3 +1,4 @@
+# TODO replace json with yaml
 import os
 import json
 from argparse import ArgumentParser
