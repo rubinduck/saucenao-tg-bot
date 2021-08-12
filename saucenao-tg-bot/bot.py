@@ -122,13 +122,12 @@ class RequestResultProvider:
 
 def main():
     """
-    Launch bot using enviroment variables as config or json config file if
-    it is specified as command line arg
+    Launch bot using json config file if
     """
     from argparse import ArgumentParser
 
     arg_parser = ArgumentParser()
-    arg_parser.add_argument("--config-file", type=str,
+    arg_parser.add_argument("config-file-path", type=str,
                             help="path to json file with config like example")
     args = arg_parser.parse_args()
 
@@ -137,34 +136,17 @@ def main():
                    "download_dir": None,
                    "minimal_simularity": None}
 
-    config_file = args.config_file
-    if config_file:
-        if not os.path.isfile(config_file):
-            print("Invalid config file")
-            return
-        with open(config_file, "r") as file:
-            config_source = json.load(file)
-    else:
-        config_source = os.environ
-
-    for config_value_key in BOT_CONFIGS:
-        config_value = config_source.get(config_value_key)
-        if config_value is None:
-            print(f"{config_name} have no value in given config source")
-            return
-        BOT_CONFIGS[config_value_key] = config_value
-    try:
-         BOT_CONFIGS["minimal_simularity"] = float(BOT_CONFIGS["minimal_simularity"])
-    except ValueError:
-        print(f"{BOT_CONFIGS['minimal_similarity']} is incorrect value for minimal similarity")
-
-    if BOT_CONFIGS["download_dir"] == "":
-        if not os.path.exists("images"):
-            os.makedirs("images")
-        BOT_CONFIGS["download_dir"] = "images"
+    config_file_path = args.config_file_path
+    if not os.path.isfile(config_file):
+        print("Invalid config file")
+        return
+    with open(config_file_path, 'r') as file:
+        try:
+            config = json.load(file)
+        except json.JSONDecodeError:
+            print('You provided incorrect json file')
     sauce_nao_bot = SauceNaoBot(*BOT_CONFIGS.values())
     sauce_nao_bot.start()
-
 
 if __name__ == "__main__":
     main()
