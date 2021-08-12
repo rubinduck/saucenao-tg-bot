@@ -133,7 +133,7 @@ dmypy.json
 *.sublime-workspace
 
 # file with bot token
-real_config.json
+config.json
 # folder with images
 images/
 # vim files
