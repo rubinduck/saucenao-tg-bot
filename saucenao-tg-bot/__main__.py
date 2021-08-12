@@ -38,7 +38,7 @@ def main():
     Launch bot using json config file if
     """
     arg_parser = ArgumentParser()
-    arg_parser.add_argument("config-file-path", type=str,
+    arg_parser.add_argument("config_file_path", type=str,
                             help="path to json file with config like example")
     args = arg_parser.parse_args()
 
@@ -48,7 +48,8 @@ def main():
                    "minimal_simularity": None}
 
     config_file_path = args.config_file_path
-    if not os.path.isfile(config_file):
+
+    if not os.path.isfile(config_file_path):
         print("Invalid config file")
         return
     with open(config_file_path, 'r') as file:
