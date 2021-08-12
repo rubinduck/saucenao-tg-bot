@@ -44,7 +44,7 @@ def main():
     config_file_path = args.config_file_path
 
     if not os.path.isfile(config_file_path):
-        print("Invalid config file")
+        print("Invalid config file path")
         return
     with open(config_file_path, 'r') as file:
         try:
@@ -55,8 +55,9 @@ def main():
         config_scheme = json.load(file)
     try:
         verify_dict(config_scheme, config)
-    except MyValueError:
-        print('Your config dont match example one')
+    except MyValueError as exception:
+        print('Your config dont match example one:')
+        print(exception.message)
         return
 
     sauce_nao_bot = SauceNaoBot(*BOT_CONFIGS.values())
