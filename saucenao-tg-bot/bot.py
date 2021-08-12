@@ -3,7 +3,6 @@ Bot providing ability to search images using saucenao.com inside telegram
 """
 
 import os
-import json
 from typing import List
 from dataclasses import dataclass
 

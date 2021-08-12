@@ -1,3 +1,8 @@
+import os
+import json
+from argparse import ArgumentParser
+
+
 def verify_dict(scheme: dict, dict_to_verify: dict):
     """
     Takes dict example sheme and checks if given dict matches.
@@ -32,8 +37,6 @@ def main():
     """
     Launch bot using json config file if
     """
-    from argparse import ArgumentParser
-
     arg_parser = ArgumentParser()
     arg_parser.add_argument("config-file-path", type=str,
                             help="path to json file with config like example")
