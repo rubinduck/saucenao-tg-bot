@@ -2,6 +2,8 @@ import os
 import json
 from argparse import ArgumentParser
 
+from bot import SauceNaoBot
+
 
 def verify_dict(scheme: dict, dict_to_verify: dict):
     """
@@ -60,7 +62,7 @@ def main():
         print(exception.message)
         return
 
-    sauce_nao_bot = SauceNaoBot(*BOT_CONFIGS.values())
+    sauce_nao_bot = SauceNaoBot(*config.values())
     sauce_nao_bot.start()
 
 main()
