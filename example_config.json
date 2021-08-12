@@ -2,5 +2,5 @@
 "api_key": "",
 "token":"",
 "download_dir":"",
-"minimal_simularity": 80.0
+"minimal_similarity": 80.0
 }
