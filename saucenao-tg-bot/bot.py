@@ -3,7 +3,6 @@ Bot providing ability to search images using saucenao.com inside telegram
 """
 
 import os
-import json
 from typing import List
 from dataclasses import dataclass
 
@@ -116,55 +115,3 @@ class RequestResultProvider:
             text += f"Author:{response.author}\n" if response.author is not None else ""
         thumbnail_url = response.thumbnail
         return RequestResult(thumbnail_url, text)
-
-
-
-
-def main():
-    """
-    Launch bot using enviroment variables as config or json config file if
-    it is specified as command line arg
-    """
-    from argparse import ArgumentParser
-
-    arg_parser = ArgumentParser()
-    arg_parser.add_argument("--config-file", type=str,
-                            help="path to json file with config like example")
-    args = arg_parser.parse_args()
-
-    BOT_CONFIGS = {"token": None,
-                   "api_key": None,
-                   "download_dir": None,
-                   "minimal_simularity": None}
-
-    config_file = args.config_file
-    if config_file:
-        if not os.path.isfile(config_file):
-            print("Invalid config file")
-            return
-        with open(config_file, "r") as file:
-            config_source = json.load(file)
-    else:
-        config_source = os.environ
-
-    for config_value_key in BOT_CONFIGS:
-        config_value = config_source.get(config_value_key)
-        if config_value is None:
-            print(f"{config_name} have no value in given config source")
-            return
-        BOT_CONFIGS[config_value_key] = config_value
-    try:
-         BOT_CONFIGS["minimal_simularity"] = float(BOT_CONFIGS["minimal_simularity"])
-    except ValueError:
-        print(f"{BOT_CONFIGS['minimal_similarity']} is incorrect value for minimal similarity")
-
-    if BOT_CONFIGS["download_dir"] == "":
-        if not os.path.exists("images"):
-            os.makedirs("images")
-        BOT_CONFIGS["download_dir"] = "images"
-    sauce_nao_bot = SauceNaoBot(*BOT_CONFIGS.values())
-    sauce_nao_bot.start()
-
-
-if __name__ == "__main__":
-    main()
