@@ -1,6 +1,7 @@
 # TODO replace json with yaml
 import os
 import json
+import logging
 from argparse import ArgumentParser
 
 from bot import SauceNaoBot
@@ -37,9 +38,8 @@ class MyValueError(ValueError):
 
 
 def main():
-    """
-    Launch bot using json config file if
-    """
+    """Launch bot using json config file if"""
+    logging.basicConfig(filename='logs.log', level=logging.INFO)
     arg_parser = ArgumentParser()
     arg_parser.add_argument("config_file_path", type=str,
                             help="path to json file with config like example")
@@ -47,7 +47,7 @@ def main():
     config_file_path = args.config_file_path
 
     if not os.path.isfile(config_file_path):
-        print("Invalid config file path")
+        print('Invalid config file path')
         return
     with open(config_file_path, 'r') as file:
         try:
