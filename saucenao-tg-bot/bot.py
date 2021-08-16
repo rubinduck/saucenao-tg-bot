@@ -17,6 +17,16 @@ class RequestResult:
     text: str
 
 
+def catch_exceptions(message_handler):
+    """universal error catcher for any new message hanlder"""
+    def decorated_method(self, update: Update, context: CallbackContext):
+        try:
+            method(self, update, context)
+        except Exception:
+            chat_id = update.message.chat_id
+            self.bot.send_message(chat_id=chat_id, text='Something went wrong on server')
+    return decorated_method
+
 class SauceNaoBot:
     def __init__(self,
                  token: str,
@@ -47,6 +57,7 @@ class SauceNaoBot:
     def stop(self):
         self.updater.stop()
 
+    @catch_exceptions
     def handle_photo(self, update: Update, context: CallbackContext):
         """method for images sent compressed"""
         # telegram provides 3 photo versions from most compressed
@@ -55,6 +66,7 @@ class SauceNaoBot:
         file_name = f"{photo_id}.jpg"
         self.process_request(update, photo_id, file_name)
 
+    @catch_exceptions
     def handle_image_file(self, update: Update, context: CallbackContext):
         """method for images sent as file"""
         file_dict = update.message.document
