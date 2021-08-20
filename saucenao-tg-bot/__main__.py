@@ -17,7 +17,7 @@ def is_config_right(config: dict, config_scheme: dict) -> bool:
     return True
 
 def main():
-    """Launch bot using json config file if"""
+    """Launch bot using config parametrs from provided file"""
     logging.basicConfig(filename='logs.log', level=logging.INFO)
     arg_parser = ArgumentParser()
     arg_parser.add_argument("config_file_path", type=str,
