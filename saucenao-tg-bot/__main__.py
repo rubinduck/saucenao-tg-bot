@@ -12,7 +12,7 @@ def is_config_right(config: dict, config_scheme: dict) -> bool:
     if config.keys() != config_scheme.keys():
         return False
     for key in config_scheme:
-        if type(config_scheme[key]) != type(config[]):
+        if type(config_scheme[key]) != type(config[key]):
             return False
     return True
 
