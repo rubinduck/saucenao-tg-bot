@@ -12,7 +12,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 # if config file path is not passed, use default name
 if [ -z "$1" ]; then
-	config_path="config.json"
+	config_path="config.yaml"
 else
 	config_path="$1"
 fi

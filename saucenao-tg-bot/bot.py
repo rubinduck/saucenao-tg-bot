@@ -3,8 +3,11 @@ Bot providing ability to search images using saucenao.com inside telegram
 """
 
 import os
+import logging
+import traceback
 from typing import List
 from dataclasses import dataclass
+from datetime import datetime
 
 from telegram import Bot, Update, InputMediaPhoto
 from telegram.ext import CallbackContext, Updater, MessageHandler, Filters
@@ -16,6 +19,32 @@ class RequestResult:
     photo_url: str
     text: str
 
+
+def catch_exceptions(message_handler):
+    """universal error catcher for any new message hanlder"""
+    def decorated_method(self, update: Update, context: CallbackContext):
+        try:
+            message_handler(self, update, context)
+        except Exception as ex:
+            logging.error(to_str(ex))
+            chat_id = update.message.chat_id
+            self.bot.send_message(chat_id=chat_id, text='Something went wrong on server')
+    return decorated_method
+
+def to_str(ex: Exception) -> str:
+    return ''.join(traceback.format_exception(type(ex), ex, ex.__traceback__))
+
+# TODO make logging better
+def log_requests(message_handler):
+    def decorated_method(self, update: Update, context: CallbackContext):
+        message = update.message
+        if message.forward_date:
+            msg_time = message.forward_date
+        else:
+            msg_time = message.date
+        logging.info(msg_time.isoformat())
+        message_handler(self, update, context)
+    return decorated_method
 
 class SauceNaoBot:
     def __init__(self,
@@ -30,6 +59,7 @@ class SauceNaoBot:
         self.init_message_handlers()
         self.request_result_provider = RequestResultProvider(api_key,
                                                              minimal_similarity)
+        logging.info('Launched bot')
 
     def init_message_handlers(self):
         photo_handler = MessageHandler(
@@ -47,6 +77,8 @@ class SauceNaoBot:
     def stop(self):
         self.updater.stop()
 
+    @log_requests
+    @catch_exceptions
     def handle_photo(self, update: Update, context: CallbackContext):
         """method for images sent compressed"""
         # telegram provides 3 photo versions from most compressed
@@ -55,6 +87,8 @@ class SauceNaoBot:
         file_name = f"{photo_id}.jpg"
         self.process_request(update, photo_id, file_name)
 
+    @log_requests
+    @catch_exceptions
     def handle_image_file(self, update: Update, context: CallbackContext):
         """method for images sent as file"""
         file_dict = update.message.document
