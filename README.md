@@ -4,9 +4,9 @@ Telegram bot to access SauceNAO.com functionality for searching image source
 # How to launch
 Requires python 3.7+\
 Launch steps:
-1. Put config variables (listed below and in exampel .json) to config.json file
+1. Put config variables (listed below and in example.yaml) to config.yaml file
 2. Run `launch.sh` or `launch.sh <path-to-config-file>` if your config file
-name is not default "config.json". If you are on windows or want to launch
+name is not default "config.yaml". If you are on windows or want to launch
 manually follow next steps
 3. Install dependencies from requirments.txt
 4. run `python saucenao-tg-bot <path-to-config-file>` here
